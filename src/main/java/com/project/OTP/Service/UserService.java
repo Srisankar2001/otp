@@ -17,6 +17,9 @@ public class UserService {
     @Autowired
     UserRepo userRepo;
 
+    @Autowired
+    EmailService emailService;
+
     @Transactional
     public boolean insertOtp(EmailDto emailDto){
         Optional<UserEntity> user = userRepo.findByEmail(emailDto.getEmail());
@@ -24,7 +27,13 @@ public class UserService {
            int i =  userRepo.deleteByEmail(emailDto.getEmail());
            if(i == 1){
                System.out.println("Already registered email deleted : success");
-               int j =   userRepo.addNewMail(emailDto.getEmail(),1000+random.nextInt(9000));
+               int otp = 1000+random.nextInt(9000);
+               int j =   userRepo.addNewMail(emailDto.getEmail(),otp);
+               try{
+                   emailService.sendEmail(emailDto.getEmail(),"OTP Validation","Your OTP is: "+otp);
+               }catch (Exception e){
+                   System.out.println(e);
+               }
                if(j == 1){
                    System.out.println("OTP added to DB : success");
                    return true;
@@ -37,7 +46,13 @@ public class UserService {
                return false;
            }
         }else{
-            int j = userRepo.addNewMail(emailDto.getEmail(),1000+random.nextInt(9000));
+            int otp = 1000+random.nextInt(9000);
+            int j = userRepo.addNewMail(emailDto.getEmail(),otp);
+            try{
+                emailService.sendEmail(emailDto.getEmail(),"OTP Validation","Your OTP is: "+otp);
+            }catch (Exception e){
+                System.out.println(e);
+            }
             if(j == 1){
                 System.out.println("OTP added to DB : success");
                 return true;
